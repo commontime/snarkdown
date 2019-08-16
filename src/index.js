@@ -7,6 +7,10 @@ const TAGS = {
 	'-': ['<hr />']
 };
 
+const FEATURES = {
+	links: false
+};
+
 /** Outdent a string based on the first indented line's leading whitespace
  *	@private
  */
@@ -80,7 +84,7 @@ export default function parse(md, prevLinks) {
 			chunk = `<img src="${encodeAttr(token[8])}" alt="${encodeAttr(token[7])}">`;
 		}
 		// Links:
-		else if (token[10]) {
+		else if (FEATURES.links !== false && token[10]) {
 			out = out.replace('<a>', `<a href="${encodeAttr(token[11] || links[prev.toLowerCase()])}">`);
 			chunk = flush() + '</a>';
 		}
