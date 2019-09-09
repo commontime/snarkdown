@@ -22,9 +22,9 @@ function encodeAttr(str) {
 }
 
 /** Parse Markdown into an HTML String. */
-export default function parse(md, prevLinks, feats) {
+export default function parse(md, prevLinks, opts) {
 
-	const FEATURES = Object.assign({
+	const OPTIONS = Object.assign({
 		indentBlocks: true,
 		quotesAndLists: true,
 		links: true,
@@ -32,7 +32,7 @@ export default function parse(md, prevLinks, feats) {
 		headings: true,
 		code: true,
 		inline: true
-	}, feats);
+	}, opts);
 
 	let tokenizer = /((?:^|\n+)(?:\n---+|\* \*(?: \*)+)\n)|(?:^``` *(\w*)\n([\s\S]*?)\n```$)|((?:(?:^|\n+)(?:\t|  {2,}).+)+\n*)|((?:(?:^|\n)([>*+-]|\d+\.)\s+.*)+)|(?:\!\[([^\]]*?)\]\(([^\)]+?)\))|(\[)|(\](?:\(([^\)]+?)\))?)|(?:(?:^|\n+)([^\s].*)\n(\-{3,}|={3,})(?:\n+|$))|(?:(?:^|\n+)(#{1,6})\s*(.+)(?:\n+|$))|(?:`([^`].*?)`)|(  \n\n*|\n{2,}|__|\*\*|[_*]|~~)/gm,
 		context = [],
@@ -69,16 +69,16 @@ export default function parse(md, prevLinks, feats) {
 			// escaped
 		}
 		// Code/Indent blocks:
-		else if (FEATURES.indentBlocks !== false && (token[3] || token[4])) {
+		else if (OPTIONS.indentBlocks !== false && (token[3] || token[4])) {
 			chunk = '<pre class="code '+(token[4]?'poetry':token[2].toLowerCase())+'">'+outdent(encodeAttr(token[3] || token[4]).replace(/^\n+|\n+$/g, ''))+'</pre>';
 		}
 		// > Quotes, -* lists:
-		else if (FEATURES.quotesAndLists !== false && token[6]) {
+		else if (OPTIONS.quotesAndLists !== false && token[6]) {
 			t = token[6];
 			if (t.match(/\./)) {
 				token[5] = token[5].replace(/^\d+/gm, '');
 			}
-			inner = parse(outdent(token[5].replace(/^\s*[>*+.-]/gm, '')), null, FEATURES);
+			inner = parse(outdent(token[5].replace(/^\s*[>*+.-]/gm, '')), null, OPTIONS);
 			if (t==='>') t = 'blockquote';
 			else {
 				t = t.match(/\./) ? 'ol' : 'ul';
@@ -87,28 +87,28 @@ export default function parse(md, prevLinks, feats) {
 			chunk = '<'+t+'>' + inner + '</'+t+'>';
 		}
 		// Images:
-		else if (FEATURES.images !== false && token[8]) {
+		else if (OPTIONS.images !== false && token[8]) {
 			chunk = `<img src="${encodeAttr(token[8])}" alt="${encodeAttr(token[7])}">`;
 		}
 		// Links:
-		else if (FEATURES.links !== false && token[10]) {
+		else if (OPTIONS.links !== false && token[10]) {
 			out = out.replace('<a>', `<a href="${encodeAttr(token[11] || links[prev.toLowerCase()])}">`);
 			chunk = flush() + '</a>';
 		}
-		else if (token[9]) {
+		else if (OPTIONS.links !== false && token[9]) {
 			chunk = '<a>';
 		}
 		// Headings:
-		else if (FEATURES.headings !== false && (token[12] || token[14])) {
+		else if (OPTIONS.headings !== false && (token[12] || token[14])) {
 			t = 'h' + (token[14] ? token[14].length : (token[13][0]==='='?1:2));
-			chunk = '<'+t+'>' + parse(token[12] || token[15], links, FEATURES) + '</'+t+'>';
+			chunk = '<'+t+'>' + parse(token[12] || token[15], links, OPTIONS) + '</'+t+'>';
 		}
 		// `code`:
-		else if (FEATURES.code !== false && token[16]) {
-			chunk = '<code>'+encodeAttr(token[16])+'</code>';
+		else if (OPTIONS.code !== false && token[16]) {
+			chunk = (OPTIONS.replaceCodeWithEmoji) ? `🔢` : '<code>'+encodeAttr(token[16])+'</code>';
 		}
 		// Inline formatting: *em*, **strong** & friends
-		else if (FEATURES.inline !== false && (token[17] || token[1])) {
+		else if (OPTIONS.inline !== false && (token[17] || token[1])) {
 			chunk = tag(token[17] || '--');
 		}
 		out += prev;
