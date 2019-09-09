@@ -26,11 +26,11 @@ export default function parse(md, prevLinks, opts) {
 
 	const OPTIONS = Object.assign({
 		indentBlocks: true,
-		quotesAndLists: true,
 		links: true,
 		images: true,
 		headings: true,
 		code: true,
+		replaceCodeWithEmoji: null,
 		inline: true
 	}, opts);
 
@@ -69,8 +69,8 @@ export default function parse(md, prevLinks, opts) {
 			// escaped
 		}
 		// Code/Indent blocks:
-		else if (OPTIONS.indentBlocks !== false && (token[3] || token[4])) {
-			chunk = '<pre class="code '+(token[4]?'poetry':token[2].toLowerCase())+'">'+outdent(encodeAttr(token[3] || token[4]).replace(/^\n+|\n+$/g, ''))+'</pre>';
+		else if (OPTIONS.code !== false && (token[3] || token[4])) {
+			chunk = (OPTIONS.replaceCodeWithEmoji) ? `${OPTIONS.replaceCodeWithEmoji}` : '<pre class="code '+(token[4]?'poetry':token[2].toLowerCase())+'">'+outdent(encodeAttr(token[3] || token[4]).replace(/^\n+|\n+$/g, ''))+'</pre>';
 		}
 		// > Quotes, -* lists:
 		else if (OPTIONS.quotesAndLists !== false && token[6]) {
@@ -105,7 +105,7 @@ export default function parse(md, prevLinks, opts) {
 		}
 		// `code`:
 		else if (OPTIONS.code !== false && token[16]) {
-			chunk = (OPTIONS.replaceCodeWithEmoji) ? `🔢` : '<code>'+encodeAttr(token[16])+'</code>';
+			chunk = (OPTIONS.replaceCodeWithEmoji) ? `${OPTIONS.replaceCodeWithEmoji}` : '<code>'+encodeAttr(token[16])+'</code>';
 		}
 		// Inline formatting: *em*, **strong** & friends
 		else if (OPTIONS.inline !== false && (token[17] || token[1])) {
