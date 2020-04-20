@@ -92,9 +92,16 @@ export default function parse(md, prevLinks, opts) {
 		}
 		// Links:
 		else if (OPTIONS.links !== false && token[10]) {
-			out = out.replace('<a>', `<a href="${encodeAttr(token[11] || links[prev.toLowerCase()])}">`);
-			chunk = flush() + '</a>';
-		}
+            let url = encodeAttr(token[11] || links[prev.toLowerCase()]);
+            // Check if the URL has a protocol
+            if (url.search(/^http[s]?\:\/\//) === -1) {
+                url = `http://${url}`;
+            }
+            out = out.replace('<a>', `<a href="${url}" target="_system">`);
+            // If no link text is specified just use the raw URL
+            const text = flush() || token[11];
+            chunk = text + '</a>';
+        }
 		else if (OPTIONS.links !== false && token[9]) {
 			chunk = '<a>';
 		}
