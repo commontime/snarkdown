@@ -97,7 +97,7 @@ export default function parse(md, prevLinks, opts) {
             if (url.search(/^http[s]?\:\/\//) === -1) {
                 url = `http://${url}`;
             }
-            out = out.replace('<a>', `<a href="${url}" target="_system">`);
+            out = out.replace('<a>', `<a href="#" onclick="window.open('${url}', '_system')">`);
             // If no link text is specified just use the raw URL
             const text = flush() || token[11];
             chunk = text + '</a>';
