@@ -1,7 +1,7 @@
 {
   "name": "@commontimeltd/snarkdown",
   "description": "Transform Markdown into HTML.",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "main": "dist/snarkdown.js",
   "module": "dist/snarkdown.es.js",
   "umd:main": "dist/snarkdown.umd.js",
